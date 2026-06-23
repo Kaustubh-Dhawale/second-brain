@@ -1,0 +1,18 @@
+rules_version = '2';
+
+// Locks every document to its owner. A signed-in user can only read/write
+// items under their own users/{uid} subtree. Nothing else is accessible.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{userId}/items/{itemId} {
+      allow read, write: if request.auth != null
+                         && request.auth.uid == userId;
+
+      // Attached file bytes (PDFs/images) live here, owner-locked too.
+      match /files/{fileId} {
+        allow read, write: if request.auth != null
+                           && request.auth.uid == userId;
+      }
+    }
+  }
+}

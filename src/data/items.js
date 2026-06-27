@@ -97,7 +97,7 @@ export function subscribeItems(uid, onChange, onError) {
  */
 export async function addItem(
   uid,
-  { text, url = null, attachments = [], knownCategories = CATEGORIES }
+  { text, url = null, attachments = [], knownCategories = CATEGORIES, schedule = null }
 ) {
   const trimmed = (text || '').trim()
   const detectedUrl = url || extractUrl(trimmed)
@@ -130,6 +130,10 @@ export async function addItem(
     suggestedCategory: null,
     needsEnrich: willEnrich, // AI pass adds context / better category later
     attachments: split.map((s) => s.meta),
+    dueAt: schedule?.dueAt ?? null,
+    hasTime: schedule?.hasTime ?? false,
+    recurrence: schedule?.recurrence ?? null,
+    gcalEventId: null,
   }
 
   const ref = await addDoc(itemsCol(uid), docData)
@@ -173,6 +177,20 @@ export function setCategory(uid, id, category, currentProject) {
     patch.project = null
   }
   return updateItem(uid, id, patch)
+}
+
+// Set / change / clear a note's schedule (due date, time, recurrence).
+export function setSchedule(uid, id, schedule) {
+  return updateItem(uid, id, {
+    dueAt: schedule?.dueAt ?? null,
+    hasTime: schedule?.hasTime ?? false,
+    recurrence: schedule?.recurrence ?? null,
+  })
+}
+
+// Remember the linked Google Calendar event id (for later update/delete).
+export function setGcalEventId(uid, id, gcalEventId) {
+  return updateItem(uid, id, { gcalEventId: gcalEventId ?? null })
 }
 
 export function setProjectFields(uid, id, fields) {

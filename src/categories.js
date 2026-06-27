@@ -70,3 +70,13 @@ export const slugToCategory = (slug) => {
 }
 
 export const categoryToSlug = (category) => category.toLowerCase()
+
+// Smart views shown above the collections in the sidebar. "Inbox" doubles as a
+// category filter; "Today"/"Scheduled" are schedule-driven (handled in App).
+export const SMART_VIEWS = ['Today', 'Scheduled', 'Inbox']
+
+export const slugToView = (slug) => {
+  if (!slug) return null
+  const map = { today: 'Today', scheduled: 'Scheduled', inbox: 'Inbox' }
+  return map[String(slug).toLowerCase()] || null
+}

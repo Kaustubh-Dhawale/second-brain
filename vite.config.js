@@ -27,7 +27,7 @@ export default defineConfig({
         orientation: 'portrait',
         // Default landing view. A home-screen shortcut to "/" opens straight to it;
         // the app reads ?view=errands (set below) to land on the Errands view.
-        start_url: '/?view=errands',
+        start_url: '/?view=today',
         scope: '/',
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
@@ -41,9 +41,9 @@ export default defineConfig({
         ],
         // App shortcuts (long-press the installed icon) jump to specific views.
         shortcuts: [
-          { name: 'Errands', short_name: 'Errands', url: '/?view=errands' },
-          { name: 'Inbox', short_name: 'Inbox', url: '/?view=inbox' },
-          { name: 'Quick Capture', short_name: 'Capture', url: '/?view=inbox&focus=1' },
+          { name: 'Today', short_name: 'Today', url: '/?view=today' },
+          { name: 'Scheduled', short_name: 'Scheduled', url: '/?view=scheduled' },
+          { name: 'Quick Capture', short_name: 'Capture', url: '/?view=today&focus=1' },
         ],
       },
       devOptions: {

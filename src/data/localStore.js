@@ -102,7 +102,7 @@ function attachmentId() {
   return 'f-' + Date.now() + '-' + Math.random().toString(36).slice(2, 8)
 }
 
-export async function addItem(_uid, { text, url = null, attachments = [] }) {
+export async function addItem(_uid, { text, url = null, attachments = [], schedule = null }) {
   await ensureCache()
   const trimmed = (text || '').trim()
   const detectedUrl = url || extractUrl(trimmed)
@@ -130,6 +130,10 @@ export async function addItem(_uid, { text, url = null, attachments = [] }) {
     suggestedCategory: null,
     needsEnrich: false, // no AI in local mode
     attachments: atts,
+    dueAt: schedule?.dueAt ?? null,
+    hasTime: schedule?.hasTime ?? false,
+    recurrence: schedule?.recurrence ?? null,
+    gcalEventId: null,
   }
   cache.push(item)
   await writeItem(item)
@@ -158,6 +162,18 @@ export function setCategory(_uid, id, category, currentProject) {
       category === 'Projects' ? currentProject || emptyProject() : null,
     classification: { ...item.classification, auto: false },
   }))
+}
+
+export function setSchedule(_uid, id, schedule) {
+  return patch(id, () => ({
+    dueAt: schedule?.dueAt ?? null,
+    hasTime: schedule?.hasTime ?? false,
+    recurrence: schedule?.recurrence ?? null,
+  }))
+}
+
+export function setGcalEventId(_uid, id, gcalEventId) {
+  return patch(id, () => ({ gcalEventId: gcalEventId ?? null }))
 }
 
 export function setProjectFields(_uid, id, fields) {

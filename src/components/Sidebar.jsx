@@ -13,6 +13,7 @@ const SunIcon = () => <Icon d={<><circle cx="12" cy="12" r="4" /><path d="M12 2v
 const CalIcon = () => <Icon d={<><rect x="3" y="4.5" width="18" height="16" rx="2" /><path d="M3 9h18M8 2.5v4M16 2.5v4" /></>} />
 const InboxIcon = () => <Icon d={<><path d="M3 12h5l1.5 3h5L16 12h5" /><path d="M5 5h14l2 7v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-5z" /></>} />
 const BellIcon = () => <Icon d={<><path d="M6 9a6 6 0 0 1 12 0c0 4 1.5 5.5 2 6H4c.5-.5 2-2 2-6z" /><path d="M10 20a2 2 0 0 0 4 0" /></>} />
+const AllIcon = () => <Icon d={<><line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" /></>} />
 
 const LEAD_OPTS = [
   [0, 'At due time only'],
@@ -71,6 +72,7 @@ export default function Sidebar({
 
       <div className="nav-group">
         <div className="nav-heading">Collections</div>
+        <Row id="All" icon={<AllIcon />} label="All" count={open.length} />
         {collections.map((c) => (
           <Row
             key={c}

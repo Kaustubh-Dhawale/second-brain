@@ -128,6 +128,7 @@ function Shell({ uid, email, cloud }) {
 
     return items.filter((i) => {
       if (!matchesSearch(i)) return false
+      if (active === 'All') return true
       if (active === 'Today') return true
       if (active === 'Scheduled') return Boolean(i.dueAt)
       if (active === 'Inbox') return i.category === 'Inbox'
@@ -272,7 +273,8 @@ function Shell({ uid, email, cloud }) {
   const viewTitle =
     active === 'Today' ? 'Today' :
     active === 'Scheduled' ? 'Scheduled' :
-    active === 'Inbox' ? 'Inbox' : active
+    active === 'Inbox' ? 'Inbox' :
+    active === 'All' ? 'All notes' : active
 
   return (
     <div className="layout">

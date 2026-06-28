@@ -480,11 +480,17 @@ button { font: inherit; cursor: pointer; }
   body { font-size: 16px; }
   .capture-input { font-size: 16px; }
   .row-drawer { grid-template-columns: 1fr; padding-left: 39px; }
-  .row-actions { opacity: 1; } /* no hover on touch — always show */
   .detect-hint { display: none; }
+
+  /* Quiet rows on mobile: text gets the full width; the time tag, category
+     chip and action icons drop to a second line so the title no longer wraps
+     after every word. */
+  .row-line { flex-wrap: wrap; align-items: center; }
+  .row-main { flex: 1 0 calc(100% - 32px); }
+  .row-meta { order: 2; margin: 6px 0 0 29px; flex-wrap: wrap; }
+  .row-actions { order: 3; opacity: 1; margin: 6px 0 0 auto; }
 }
 
 @media (max-width: 420px) {
-  .row-meta .cat-chip { display: none; } /* keep tiny screens uncluttered */
   .topbar-right .link.small { display: none; }
 }

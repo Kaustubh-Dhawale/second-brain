@@ -84,6 +84,7 @@ function Shell({ uid, email, cloud }) {
   const [search, setSearch] = useState('')
   const [enriching, setEnriching] = useState(false)
   const [navOpen, setNavOpen] = useState(false)
+  const [quickOpen, setQuickOpen] = useState(false)
   const [calConnected, setCalConnected] = useState(false)
   const [calBusy, setCalBusy] = useState(false)
   const [external, setExternal] = useState([])
@@ -119,6 +120,14 @@ function Shell({ uid, email, cloud }) {
     currentSubscription().then((sub) => setPushEnabled(Boolean(sub)))
     getReminderLead(uid).then(setLeadMin).catch(() => {})
   }, [cloud, uid])
+
+  // Esc closes the quick-capture sheet.
+  useEffect(() => {
+    if (!quickOpen) return
+    const onKey = (e) => { if (e.key === 'Escape') setQuickOpen(false) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [quickOpen])
 
   // --- visible items for the active view --------------------------------
   const visible = useMemo(() => {
@@ -383,6 +392,35 @@ function Shell({ uid, email, cloud }) {
         onToggleDone={handlers.onToggleDone}
         busy={calBusy}
       />
+
+      <button
+        className="fab"
+        onClick={() => setQuickOpen(true)}
+        aria-label="Quick capture"
+        title="Quick capture"
+      >
+        +
+      </button>
+
+      {quickOpen && (
+        <div className="quick-overlay" onClick={() => setQuickOpen(false)}>
+          <div className="quick-sheet" onClick={(e) => e.stopPropagation()}>
+            <div className="quick-head">
+              <span>Quick capture</span>
+              <button className="quick-close" onClick={() => setQuickOpen(false)} aria-label="Close">
+                ✕
+              </button>
+            </div>
+            <CaptureBar
+              autoFocus
+              onCapture={async (text, attachments, schedule) => {
+                await onCapture(text, attachments, schedule)
+                setQuickOpen(false)
+              }}
+            />
+          </div>
+        </div>
+      )}
     </div>
   )
 }

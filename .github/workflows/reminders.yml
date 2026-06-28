@@ -1,0 +1,39 @@
+name: Send reminders
+
+# Free scheduler (no Blaze). Runs the reminder sender on a timer. GitHub cron is
+# approximate — runs roughly every 5 minutes and can be delayed under load — so
+# reminders may arrive a few minutes after their exact time.
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch: {} # lets you run it manually from the Actions tab to test
+
+# Avoid overlapping runs if one is slow.
+concurrency:
+  group: reminders
+  cancel-in-progress: false
+
+jobs:
+  send:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        working-directory: reminder-job
+        run: npm install --no-audit --no-fund
+
+      - name: Send due reminders
+        working-directory: reminder-job
+        env:
+          # Reuses the same service account secret as the hosting deploy.
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          # The VAPID public key is not secret; the private key is.
+          VAPID_PUBLIC_KEY: 'BKRQOhlTNsDUGyAOiz2usslkJKFzPj4pOdk1b3neVO3e2o2SN9PrKhnCWnZ7t5ojfspK-H9U-6vM58WiQloiKfc'
+          VAPID_PRIVATE_KEY: ${{ secrets.VAPID_PRIVATE_KEY }}
+          VAPID_SUBJECT: 'mailto:kaustubhdhawale03@gmail.com'
+        run: node index.mjs

@@ -1,0 +1,10 @@
+{
+  "name": "reminder-job",
+  "description": "Scheduled reminder push sender (run by GitHub Actions).",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "firebase-admin": "^12.6.0",
+    "web-push": "^3.6.7"
+  }
+}

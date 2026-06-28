@@ -15,6 +15,8 @@ export default defineConfig({
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         navigateFallback: '/index.html',
         cleanupOutdatedCaches: true,
+        // Merge our push / notificationclick handlers into the SW.
+        importScripts: ['push-sw.js'],
       },
       includeAssets: ['icons/icon-192.png', 'icons/icon-512.png', 'favicon.svg'],
       manifest: {

@@ -235,3 +235,9 @@ export async function deleteItem(_uid, id) {
   await eraseItem(id)
   emit()
 }
+
+// Push reminders require the cloud backend; no-ops in local mode.
+export async function savePushSubscription() {}
+export async function removePushSubscription() {}
+export async function setReminderLead() {}
+export async function getReminderLead() { return 15 }

@@ -18,30 +18,18 @@ export default function Agenda({
   const now = Date.now()
   const today = new Date(now)
 
-  // Normalize app items + external events into one shape for the agenda.
   const appEntries = items
     .filter((i) => i.dueAt && !i.done)
     .map((i) => ({
-      key: i.id,
-      title: i.text,
-      dueAt: i.dueAt,
-      hasTime: i.hasTime,
-      external: false,
-      id: i.id,
+      key: i.id, title: i.text, dueAt: i.dueAt, hasTime: i.hasTime, external: false, id: i.id,
     }))
 
   const extEntries = externalEvents.map((e) => ({
-    key: `ext-${e.id}`,
-    title: e.title,
-    dueAt: e.start,
-    hasTime: e.hasTime,
-    external: true,
+    key: `ext-${e.id}`, title: e.title, dueAt: e.start, hasTime: e.hasTime, external: true,
   }))
 
   const all = [...appEntries, ...extEntries]
-  const groups = groupByBucket(all, { scheduledOnly: true, now }).filter(
-    (g) => g.key !== 'overdue' || g.items.length
-  )
+  const groups = groupByBucket(all, { scheduledOnly: true, now })
 
   return (
     <aside className="agenda">
@@ -65,12 +53,7 @@ export default function Agenda({
                     {e.hasTime ? formatTime(new Date(e.dueAt).getHours(), new Date(e.dueAt).getMinutes()).replace(' ', '') : 'all-day'}
                   </span>
                   {!e.external && onToggleDone ? (
-                    <button
-                      className="agenda-check"
-                      onClick={() => onToggleDone(e.id, true)}
-                      title="Mark done"
-                      aria-label="Mark done"
-                    />
+                    <button className="agenda-check" onClick={() => onToggleDone(e.id, true)} title="Mark done" aria-label="Mark done" />
                   ) : (
                     <span className="agenda-bullet" aria-hidden="true" />
                   )}

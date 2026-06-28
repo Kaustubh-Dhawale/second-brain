@@ -327,3 +327,40 @@ export function approveCategory(uid, id, category) {
 export function dismissSuggestion(uid, id) {
   return updateItem(uid, id, { suggestedCategory: null })
 }
+
+// --- Push reminders -------------------------------------------------------
+// Stable doc id derived from a subscription endpoint (so re-subscribing the
+// same device overwrites rather than duplicates).
+function subId(endpoint) {
+  let h = 0
+  for (let i = 0; i < endpoint.length; i++) h = (h * 31 + endpoint.charCodeAt(i)) >>> 0
+  return 's-' + h.toString(36)
+}
+
+export async function savePushSubscription(uid, sub) {
+  if (!sub || !sub.endpoint) return
+  await setDoc(doc(db, 'users', uid, 'pushSubs', subId(sub.endpoint)), {
+    endpoint: sub.endpoint,
+    keys: sub.keys || null,
+    createdAt: Date.now(),
+  })
+}
+
+export async function removePushSubscription(uid, endpoint) {
+  if (!endpoint) return
+  await deleteDoc(doc(db, 'users', uid, 'pushSubs', subId(endpoint))).catch(() => {})
+}
+
+export async function setReminderLead(uid, minutes) {
+  await setDoc(doc(db, 'users', uid), { remindLeadMin: minutes }, { merge: true })
+}
+
+export async function getReminderLead(uid) {
+  try {
+    const snap = await getDoc(doc(db, 'users', uid))
+    const v = snap.exists() ? snap.data().remindLeadMin : null
+    return typeof v === 'number' ? v : 15
+  } catch {
+    return 15
+  }
+}

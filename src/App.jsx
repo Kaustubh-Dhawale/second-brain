@@ -18,6 +18,10 @@ import {
   addAttachments,
   getFileData,
   removeAttachment,
+  savePushSubscription,
+  removePushSubscription,
+  setReminderLead,
+  getReminderLead,
 } from './data/store.js'
 import { openDataUrl } from './files.js'
 import { signOutUser } from './auth.js'
@@ -32,6 +36,13 @@ import {
   deleteEvent,
   listUpcoming,
 } from './calendar.js'
+import {
+  isPushConfigured,
+  notificationPermission,
+  enablePush,
+  disablePush,
+  currentSubscription,
+} from './push.js'
 import AuthScreen from './components/AuthScreen.jsx'
 import CaptureBar from './components/CaptureBar.jsx'
 import Sidebar from './components/Sidebar.jsx'
@@ -76,6 +87,10 @@ function Shell({ uid, email, cloud }) {
   const [calConnected, setCalConnected] = useState(false)
   const [calBusy, setCalBusy] = useState(false)
   const [external, setExternal] = useState([])
+  const [pushEnabled, setPushEnabled] = useState(false)
+  const [pushPerm, setPushPerm] = useState('default')
+  const [pushBusy, setPushBusy] = useState(false)
+  const [leadMin, setLeadMin] = useState(15)
   const { items, loading } = useItems(uid)
   const didEnrich = useRef(false)
 
@@ -96,6 +111,14 @@ function Shell({ uid, email, cloud }) {
     listUpcoming(8).then((ev) => alive && setExternal(ev)).catch(() => {})
     return () => { alive = false }
   }, [calConnected, items])
+
+  // Push reminders: reflect this device's subscription + saved lead (cloud only).
+  useEffect(() => {
+    if (!cloud || !isPushConfigured) return
+    setPushPerm(notificationPermission())
+    currentSubscription().then((sub) => setPushEnabled(Boolean(sub)))
+    getReminderLead(uid).then(setLeadMin).catch(() => {})
+  }, [cloud, uid])
 
   // --- visible items for the active view --------------------------------
   const visible = useMemo(() => {
@@ -155,6 +178,33 @@ function Shell({ uid, email, cloud }) {
     }
   }
   const disconnect = () => disconnectCalendar()
+
+  // --- push reminders ---------------------------------------------------
+  const onEnablePush = async () => {
+    setPushBusy(true)
+    try {
+      const res = await enablePush((sub) => savePushSubscription(uid, sub))
+      setPushPerm(notificationPermission())
+      if (res === 'granted') setPushEnabled(true)
+    } catch {
+      /* user dismissed / unsupported */
+    } finally {
+      setPushBusy(false)
+    }
+  }
+  const onDisablePush = async () => {
+    setPushBusy(true)
+    try {
+      await disablePush((endpoint) => removePushSubscription(uid, endpoint))
+      setPushEnabled(false)
+    } finally {
+      setPushBusy(false)
+    }
+  }
+  const onLeadChange = (m) => {
+    setLeadMin(m)
+    setReminderLead(uid, m).catch(() => {})
+  }
 
   // Push a freshly scheduled item to Google Calendar (best effort).
   const syncToCalendar = async (id, item) => {
@@ -239,6 +289,14 @@ function Shell({ uid, email, cloud }) {
           items={items}
           categories={categories}
           onClose={() => setNavOpen(false)}
+          pushConfigured={cloud && isPushConfigured}
+          pushEnabled={pushEnabled}
+          pushPermission={pushPerm}
+          pushBusy={pushBusy}
+          onEnablePush={onEnablePush}
+          onDisablePush={onDisablePush}
+          leadMin={leadMin}
+          onLeadChange={onLeadChange}
         />
       </div>
 
